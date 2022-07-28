@@ -1,0 +1,15 @@
+[Unit]
+Description=Test Deeplay Java App service
+
+[Service]
+WorkingDirectory=/usr/bin
+ExecStart= /bin/bash /usr/bin/JavaApp.sh
+Restart=on-failure
+RestartSec=10
+TimeoutSec=10
+StartLimitInterval=120
+StartLimitBurst=6
+StartLimitAction=stop
+
+[Install]
+WantedBy=multi-user.target
