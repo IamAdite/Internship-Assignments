@@ -1,4 +1,2 @@
 # Internship-Assignments
-Assignments for:
-I Choose Alfa 2022
-Deeplay 2022
+Assignments for: I Choose Alfa 2022; Deeplay 2022.
