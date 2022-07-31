@@ -1,0 +1,2 @@
+[infotecs_server]
+Debian11 ansible_host=192.168.0.11 ansible_user=adite ansible_password=pwWggYUI35! ansible_become_pass=pwWggYUI35! 

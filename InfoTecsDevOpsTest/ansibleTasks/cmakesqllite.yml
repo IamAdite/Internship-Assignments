@@ -1,0 +1,56 @@
+---
+- name: Install Docker
+  hosts: infotecs_server
+  become: yes
+
+  tasks:
+  - name: Install Necessary Packages
+    apt:
+       pkg: 
+        - cmake
+        - gcc
+
+  - name: Download and unarchive sources
+    unarchive:
+       dest: ./
+       remote_src: yes
+       src: "https://www.sqlite.org/2018/sqlite-amalgamation-3260000.zip"
+
+  - name: Create CMakeLists.txt
+    copy:
+       dest: "./CMakeLists.txt"
+       content: |
+         cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+         add_library(sqlite3 SHARED ./sqlite-amalgamation-3260000/sqlite3.c)
+  
+  - name: Compile lib
+    shell:
+       cmd: "{{ item }}"
+    loop:
+       - cmake .
+       - make
+       - rm -rf CMakeLists.txt CMakeCache.txt CMakeFiles/ cmake_install.cmake Makefile
+
+  - name: Create Dockerfile
+    copy:
+       dest: "./Dockerfile"  
+       content: |
+         FROM debian:bullseye
+         RUN apt-get update \
+             && apt-get install -y --no-install-recommends \
+                build-essential \
+             && apt-get clean
+         RUN mkdir ./usr/src/sqlite
+         COPY ./sqlite-amalgamation-3260000/shell.c ./usr/src/sqlite 
+         COPY ./sqlite-amalgamation-3260000/sqlite3.c ./usr/src/sqlite
+         COPY ./sqlite-amalgamation-3260000/sqlite3.h ./usr/src/sqlite
+         WORKDIR ./usr/src/sqlite
+         RUN gcc -shared -o sqlite.so shell.c sqlite3.c -fPIC
+
+  - name: Build image and run container
+    shell: 
+      cmd: "{{ item }}"
+    loop:
+      - docker build -t infotecssql:1.0 ./
+      - docker run -d infotecssql:1.0
+      - rm -rf Dockerfile sqlite-amalgamation-3260000
